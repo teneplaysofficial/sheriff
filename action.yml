@@ -1,0 +1,29 @@
+name: 'Sheriff Action'
+description: 'Enforce Conventional Commits on pull request titles like a true sheriff'
+author: 'Sriman'
+
+branding:
+  color: 'gray-dark'
+  icon: 'shield'
+
+runs:
+  using: 'node20'
+  main: 'dist/index.js'
+
+inputs:
+  types:
+    description: 'Comma separated list of allowed types'
+    required: false
+
+  scopes:
+    description: 'Comma separated list of allowed scopes (empty means no restriction)'
+    required: false
+
+  breaking:
+    description: 'Allow breaking changes (!) in title (true/false)'
+    required: false
+    default: 'true'
+
+outputs:
+  valid:
+    description: 'true if PR title matches, false otherwise'
