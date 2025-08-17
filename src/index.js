@@ -98,8 +98,9 @@ function main() {
     if (valid) {
       core.info(`PR title passed validation`);
     } else {
-      core.error(`PR title failed validation: ${reason}`);
-      core.setFailed(reason || 'Unknown validation error');
+      core.setFailed(
+        `PR title failed validation: ${reason || 'Unknown validation error'}`,
+      );
     }
   } catch (err) {
     core.setOutput('valid', false);
@@ -107,4 +108,10 @@ function main() {
   }
 }
 
-main();
+if (require.main === module) main();
+
+module.exports = {
+  config,
+  validate,
+  main,
+};
