@@ -2,14 +2,13 @@ const core = require('@actions/core');
 const github = require('@actions/github');
 const types = require('./data/types.json');
 const scopes = require('./data/scopes.json');
+const colors = require('ansilory').default;
 
 const config = {
   types,
   scopes,
   allow_breaking: true,
 };
-
-// console.log(config)
 
 function validate(title = '') {
   if (!title || typeof title !== 'string') {
@@ -84,19 +83,18 @@ function main() {
       return core.setFailed('This action only runs on pull_request events');
 
     const pr_title = pr.title;
-
-    core.info(`PR title: ${pr_title}`);
+    core.info(`${colors.blue.apply('PR title:')} ${pr_title}`);
     core.warning(`Allowed types: ${config.types.join(', ')}`);
     core.warning(`Allowed scopes: ${config.scopes.join(', ')}`);
     core.warning(`Breaking allowed: ${config.allow_breaking}`);
-    core.info('Validating PR title');
+    core.info(colors.blue.apply('Validating PR title'));
 
     const { valid, reason } = validate(pr_title);
 
     core.setOutput('valid', valid);
 
     if (valid) {
-      core.info(`PR title passed validation`);
+      core.info(colors.green.apply('PR title passed validation'));
     } else {
       core.setFailed(
         `PR title failed validation: ${reason || 'Unknown validation error'}`,

@@ -753,6 +753,11 @@ ansi-styles@^6.0.0, ansi-styles@^6.2.1:
   resolved "https://registry.yarnpkg.com/ansi-styles/-/ansi-styles-6.2.1.tgz#0e62320cf99c21afff3b3012192546aacbfb05c5"
   integrity sha512-bN798gFfQX+viw3R7yrGWRqnrN2oRkEkUjjl4JNn4E8GxxbjtG3FbrEIIY3l8/hrwUwIeCZvi4QuOTP4MErVug==
 
+ansilory@^1.0.0:
+  version "1.0.0"
+  resolved "https://registry.yarnpkg.com/ansilory/-/ansilory-1.0.0.tgz#d9c494ea050acab5fafeb8ee9150ecddcd68ad90"
+  integrity sha512-zVCwrfDhYxJ/7lt8O3hqyVTUxpSfzVeq6AVelOpccKLqoLW7bMGDLQVQ/IeG1RlRpZrLqNclRQ3PBPdmZU4hzA==
+
 argparse@^2.0.1:
   version "2.0.1"
   resolved "https://registry.yarnpkg.com/argparse/-/argparse-2.0.1.tgz#246f50f3ca78a3240f6c997e8a9bd1eac49e4b38"
