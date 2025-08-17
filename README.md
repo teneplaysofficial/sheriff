@@ -6,6 +6,8 @@ _Enforce Conventional Commits on pull request titles like a true sheriff, keep y
 
 </div>
 
+[![tests](https://github.com/teneplaysofficial/sheriff/actions/workflows/tests.yml/badge.svg)](https://github.com/TenEplaysOfficial/sheriff)
+
 ## 📜 Overview
 
 **Sheriff** is a GitHub Action that patrols your pull requests and ensures titles follow a strict format. Perfect for enforcing [**Conventional Commits**](https://www.conventionalcommits.org) or your own custom rules.
