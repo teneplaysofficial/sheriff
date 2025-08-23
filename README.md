@@ -53,6 +53,7 @@ _Enforce Conventional Commits on pull request titles like a true sheriff, keep y
              types: 'feat,fix,docs,ci,test,chore'
              scopes: 'core,api,ui,docs'
              breaking: 'true'
+             enforce_scopes: 'true'
    ```
 
 4. **Commit & push** - the Sheriff is now on duty.
@@ -60,11 +61,12 @@ _Enforce Conventional Commits on pull request titles like a true sheriff, keep y
 
 ## 🔧 Inputs
 
-| Name       | Required | Default                                                                                                  | Description                                   |
-| ---------- | -------- | -------------------------------------------------------------------------------------------------------- | --------------------------------------------- |
-| `types`    | No       | Loaded from [`types.json`](https://github.com/teneplaysofficial/sheriff/blob/main/src/data/types.json)   | Comma-separated list of allowed commit types  |
-| `scopes`   | No       | Loaded from [`scopes.json`](https://github.com/teneplaysofficial/sheriff/blob/main/src/data/scopes.json) | Comma-separated list of allowed commit scopes |
-| `breaking` | No       | `true`                                                                                                   | Whether breaking changes (`!`) are allowed    |
+| Name             | Required | Default                                                                                                  | Description                                                            |
+| ---------------- | -------- | -------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------- |
+| `types`          | No       | Loaded from [`types.json`](https://github.com/teneplaysofficial/sheriff/blob/main/src/data/types.json)   | Comma-separated list of allowed commit types                           |
+| `scopes`         | No       | Loaded from [`scopes.json`](https://github.com/teneplaysofficial/sheriff/blob/main/src/data/scopes.json) | Comma-separated list of allowed commit scopes                          |
+| `breaking`       | No       | `true`                                                                                                   | Whether breaking changes (`!`) are allowed                             |
+| `enforce_scopes` | No       | `false`                                                                                                  | If `true`, only scopes from config or input are allowed; else any pass |
 
 ## 📤 Outputs
 
@@ -95,7 +97,7 @@ Titles that’ll land you in PR jail:
 3. The PR title is checked against the Sheriff’s **regex badge**.
 4. PR is marked **invalid** if:
    - Type is not allowed
-   - Scope is not allowed
+   - Scope is not allowed (only when `enforce_scopes` is `true`)
    - Breaking change (`!`) is present but disallowed
    - Message is empty
 

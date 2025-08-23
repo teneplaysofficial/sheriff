@@ -34,18 +34,29 @@ test.describe('validate()', () => {
     assert.match(result.reason, /not allowed/);
   });
 
-  test('rejects invalid scope', () => {
+  test('rejects invalid scope when enforce_scopes = true', () => {
+    config.enforce_scopes = true;
     const title = `${config.types[0]}(badscope): msg`;
     const result = validate(title);
     assert.equal(result.valid, false);
     assert.match(result.reason, /Scope "badscope"/);
+    config.enforce_scopes = false;
   });
 
-  test('accepts multiple scopes separated by |', () => {
+  test('accepts invalid scope when enforce_scopes = false', () => {
+    config.enforce_scopes = false;
+    const title = `${config.types[0]}(randomscope): msg`;
+    const result = validate(title);
+    assert.equal(result.valid, true);
+  });
+
+  test('accepts multiple scopes separated by | when enforce_scopes = true', () => {
+    config.enforce_scopes = true;
     const validScope = config.scopes[0];
     const title = `${config.types[0]}(${validScope}|${validScope}): msg`;
     const result = validate(title);
     assert.equal(result.valid, true);
+    config.enforce_scopes = false;
   });
 
   test('handles breaking changes when allowed', () => {

@@ -7,6 +7,7 @@ const config = {
   types,
   scopes,
   allow_breaking: true,
+  enforce_scopes: false,
 };
 
 // console.log(config)
@@ -38,7 +39,7 @@ function validate(title = '') {
     };
   }
 
-  if (scope) {
+  if (scope && config.enforce_scopes) {
     const scopesList = scope
       .split('|')
       .map((s) => s.trim())
@@ -69,6 +70,7 @@ function main() {
     const inputTypes = core.getInput('types');
     const inputScopes = core.getInput('scopes');
     const inputBreaking = core.getInput('breaking');
+    const inputEnforceScopes = core.getInput('enforce_scopes');
 
     if (inputTypes) config.types = inputTypes.split(',').map((t) => t.trim());
 
@@ -77,6 +79,9 @@ function main() {
 
     if (inputBreaking)
       config.allow_breaking = inputBreaking.toLowerCase() === 'true';
+
+    if (inputEnforceScopes)
+      config.enforce_scopes = inputEnforceScopes.toLowerCase() === 'true';
 
     const pr = payload.pull_request;
 
@@ -87,7 +92,11 @@ function main() {
 
     core.info(`PR title: ${pr_title}`);
     core.warning(`Allowed types: ${config.types.join(', ')}`);
-    core.warning(`Allowed scopes: ${config.scopes.join(', ')}`);
+    if (config.enforce_scopes) {
+      core.warning(`Allowed scopes: ${config.scopes.join(', ')}`);
+    } else {
+      core.warning(`Scopes are not enforced (any scope allowed)`);
+    }
     core.warning(`Breaking allowed: ${config.allow_breaking}`);
     core.info('Validating PR title');
 
