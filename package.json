@@ -61,7 +61,7 @@
     "hooks": {
       "before:init": "yarn prebuild && yarn build",
       "before:commit": "git add .",
-      "after:release": "major=$(echo ${version} | cut -d. -f1) && git tag -f v$major && git push -f origin v$major"
+      "after:release": "node -e \"const fs=require('fs');const{execSync}=require('child_process');const d=JSON.parse(fs.readFileSync('package.json','utf-8'));const v=d.version;if(v.includes('-'))process.exit(0);const major=v.split('.')[0];execSync(`git tag -f v${major}`,{stdio:'inherit'});execSync(`git push -f origin v${major}`,{stdio:'inherit'});\""
     }
   },
   "dependencies": {
