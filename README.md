@@ -20,6 +20,7 @@ _Enforce Conventional Commits on pull request titles like a true sheriff, keep y
 - Supports **multiple scopes** - `type(scope1|scope2): message`
 - Detects **breaking changes** (`!`) and checks if they’re allowed
 - Fully configurable types & scopes
+- Flexible input formats for `types` and `scopes` (comma, newline, arrays, pipes)
 - Instantly fails CI if rules are broken
 - Works in any PR workflow
 
@@ -42,18 +43,17 @@ _Enforce Conventional Commits on pull request titles like a true sheriff, keep y
      sheriff:
        runs-on: ubuntu-latest
        steps:
-         # Step 1: Checkout repository for context
-         - name: Checkout repository
-           uses: actions/checkout@v3
-
-         # Step 2: Run Sheriff PR Title Validator
          - name: Validate PR title
-           uses: teneplaysofficial/sheriff@v1
+           uses: teneplaysofficial/sheriff@v3
            with:
-             types: 'feat,fix,docs,ci,test,chore'
-             scopes: 'core,api,ui,docs'
-             breaking: 'true'
-             enforce_scopes: 'true'
+             types: [feat, fix, docs, ci, test, chore]
+             scopes: |
+               core
+               api
+               ui
+               docs
+             allow_breaking: true
+             enforce_scopes: true
    ```
 
 4. **Commit & push** - the Sheriff is now on duty.
@@ -61,12 +61,36 @@ _Enforce Conventional Commits on pull request titles like a true sheriff, keep y
 
 ## 🔧 Inputs
 
-| Name             | Required | Default                                                                                                  | Description                                                            |
-| ---------------- | -------- | -------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------- |
-| `types`          | No       | Loaded from [`types.json`](https://github.com/teneplaysofficial/sheriff/blob/main/src/data/types.json)   | Comma-separated list of allowed commit types                           |
-| `scopes`         | No       | Loaded from [`scopes.json`](https://github.com/teneplaysofficial/sheriff/blob/main/src/data/scopes.json) | Comma-separated list of allowed commit scopes                          |
-| `breaking`       | No       | `true`                                                                                                   | Whether breaking changes (`!`) are allowed                             |
-| `enforce_scopes` | No       | `false`                                                                                                  | If `true`, only scopes from config or input are allowed; else any pass |
+| Name             | Required | Default                                                                                                  | Description                                                                      |
+| ---------------- | -------- | -------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------- |
+| `types`          | No       | Loaded from [`types.json`](https://github.com/teneplaysofficial/sheriff/blob/main/src/data/types.json)   | List of allowed commit types                                                     |
+| `scopes`         | No       | Loaded from [`scopes.json`](https://github.com/teneplaysofficial/sheriff/blob/main/src/data/scopes.json) | Same as `types` but for commit scopes                                            |
+| `allow_breaking` | No       | `true`                                                                                                   | Whether breaking changes (`!`) are allowed                                       |
+| `enforce_scopes` | No       | `false`                                                                                                  | If `true`, only scopes from config or input are allowed; else any pass any value |
+
+### Example Input Formats
+
+All of these work for `types` or `scopes`:
+
+```yml
+# Comma-separated
+types: feat,fix,docs
+
+# Pipe-separated
+types: feat|fix|docs
+
+# Multiline block
+scopes: |
+  core
+  api
+  ui
+
+# YAML array
+scopes: [core, api, ui]
+
+# JSON array (quoted)
+types: '["feat","fix","docs"]'
+```
 
 ## 📤 Outputs
 
@@ -94,8 +118,9 @@ Titles that’ll land you in PR jail:
 
 1. Sheriff loads **default types** and **scopes** from JSON files.
 2. If you give workflow inputs, they **override** the defaults.
-3. The PR title is checked against the Sheriff’s **regex badge**.
-4. PR is marked **invalid** if:
+3. Inputs are normalized with `parseList`, supporting commas, pipes, YAML arrays, JSON arrays, or multiline blocks.
+4. The PR title is checked against the Sheriff’s **regex badge**.
+5. PR is marked **invalid** if:
    - Type is not allowed
    - Scope is not allowed (only when `enforce_scopes` is `true`)
    - Breaking change (`!`) is present but disallowed
