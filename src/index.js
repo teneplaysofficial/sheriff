@@ -12,21 +12,82 @@ const config = {
 
 // console.log(config)
 
+function parseList(input) {
+  if (!input) return [];
+
+  if (Array.isArray(input)) {
+    return input
+      .map((s) =>
+        String(s)
+          .trim()
+          .replace(/^["']|["']$/g, ''),
+      )
+      .filter(Boolean);
+  }
+
+  let str = String(input).trim();
+  if (str.startsWith('[') && str.endsWith(']')) {
+    try {
+      return JSON.parse(str).map((s) => String(s).trim());
+    } catch {
+      str = str.slice(1, -1);
+    }
+  }
+
+  if (str.includes('|')) {
+    return str
+      .split('|')
+      .map((s) => s.trim())
+      .filter(Boolean);
+  }
+
+  return str
+    .split(/[\n,]+/)
+    .map((s) => s.trim().replace(/^["']|["']$/g, ''))
+    .filter(Boolean);
+}
+
 function validate(title = '') {
   if (!title || typeof title !== 'string') {
     return { valid: false, reason: 'Title is empty or not a string' };
   }
 
-  const match = title.match(/^([a-z]+)(?:\(([^)]+)\))?(!?):\s(.+)$/);
+  title = title.trim();
+
+  const match = title.match(
+    /^(BREAKING CHANGE|[a-z]+)(?:\(([^)]+)\))?(!?):\s(.+)$/,
+  );
 
   if (!match) {
+    const parts = title.split(':');
+
+    if (parts.length > 1 && !parts[1].trim()) {
+      return { valid: false, reason: 'Message after colon cannot be empty' };
+    }
+
+    const upperType = title.split(':')[0].split('(')[0];
+
+    if (/^[A-Z]/.test(upperType)) {
+      return {
+        valid: false,
+        reason: `Type "${upperType}" must be lowercase`,
+      };
+    }
+
+    if (/\s+\(/.test(title) || /\)\s+:/.test(title) || /\s+:\s+/.test(title)) {
+      return {
+        valid: false,
+        reason: 'Extra spaces around type, scope, or colon are not allowed',
+      };
+    }
+
     return {
       valid: false,
       reason: 'Title does not match "<type>(<scope>)?: <message>" format',
     };
   }
 
-  const [, type, scope, breaking, message] = match;
+  const [, type, scope, breaking] = match;
 
   if (!config.types.includes(type)) {
     return { valid: false, reason: `Type "${type}" is not allowed` };
@@ -56,10 +117,6 @@ function validate(title = '') {
     return { valid: false, reason: 'Breaking changes are not allowed' };
   }
 
-  if (!message.trim()) {
-    return { valid: false, reason: 'Commit message after ":" is empty' };
-  }
-
   return { valid: true };
 }
 
@@ -69,19 +126,16 @@ function main() {
 
     const inputTypes = core.getInput('types');
     const inputScopes = core.getInput('scopes');
-    const inputBreaking = core.getInput('breaking');
-    const inputEnforceScopes = core.getInput('enforce_scopes');
+    const inputBreaking = core.getBooleanInput('allow_breaking');
+    const inputEnforceScopes = core.getBooleanInput('enforce_scopes');
 
-    if (inputTypes) config.types = inputTypes.split(',').map((t) => t.trim());
+    if (inputTypes) config.types = parseList(inputTypes);
 
-    if (inputScopes)
-      config.scopes = inputScopes.split(',').map((s) => s.trim());
+    if (inputScopes) config.scopes = parseList(inputScopes);
 
-    if (inputBreaking)
-      config.allow_breaking = inputBreaking.toLowerCase() === 'true';
+    config.allow_breaking = inputBreaking;
 
-    if (inputEnforceScopes)
-      config.enforce_scopes = inputEnforceScopes.toLowerCase() === 'true';
+    config.enforce_scopes = inputEnforceScopes;
 
     const pr = payload.pull_request;
 
@@ -123,4 +177,5 @@ module.exports = {
   config,
   validate,
   main,
+  parseList,
 };

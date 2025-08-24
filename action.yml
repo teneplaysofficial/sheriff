@@ -19,15 +19,15 @@ inputs:
     description: 'Comma separated list of allowed scopes (empty means no restriction)'
     required: false
 
-  breaking:
+  allow_breaking:
     description: 'Allow breaking changes (!) in title (true/false)'
     required: false
-    default: 'true'
+    default: true
 
   enforce_scopes:
     description: 'If true, enforce default or provided scopes. If false, allow any scope'
     required: false
-    default: 'false'
+    default: false
 
 outputs:
   valid:
