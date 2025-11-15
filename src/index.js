@@ -54,6 +54,15 @@ function validate(title = '') {
 
   title = title.trim();
 
+  const skipCiMatch = title.match(/\[\s*skip-ci\s*\]$/i);
+
+  if (skipCiMatch) {
+    core.info(
+      `Skipping PR title checks because [skip-ci] was found at index ${skipCiMatch.index}`,
+    );
+    return { valid: true };
+  }
+
   const match = title.match(
     /^(BREAKING CHANGE|[a-z]+)(?:\(([^)]+)\))?(!?):\s(.+)$/,
   );
