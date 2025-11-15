@@ -118,6 +118,31 @@ test.describe('validate()', () => {
     assert.equal(result.valid, false);
     assert.match(result.reason, /not allowed/);
   });
+
+  test('accepts title ending with [skip-ci]', () => {
+    const result = validate('feat: add feature [skip-ci]');
+    assert.equal(result.valid, true);
+  });
+
+  test('accepts title ending with spaced [ skip-ci ]', () => {
+    const result = validate('fix(core): fast fix [ skip-ci ]');
+    assert.equal(result.valid, true);
+  });
+
+  test('accepts title with uppercase SKIP-CI', () => {
+    const result = validate('docs: update readme [SKIP-CI]');
+    assert.equal(result.valid, true);
+  });
+
+  test('skip-ci must be at the end only', () => {
+    const result = validate('[skip-ci] feat: xyz');
+    assert.equal(result.valid, false);
+  });
+
+  test('skip-ci embedded without brackets should not skip', () => {
+    const result = validate('feat: skip-ci update');
+    assert.equal(result.valid, true);
+  });
 });
 
 test.describe('parseList()', () => {
