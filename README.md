@@ -23,6 +23,7 @@ _Enforce Conventional Commits on pull request titles like a true sheriff, keep y
 - Flexible input formats for `types` and `scopes` (comma, newline, arrays, pipes)
 - Instantly fails CI if rules are broken
 - Works in any PR workflow
+- **NEW:** Supports **`[skip-ci]`** at the end of the PR title to bypass validation
 
 ## 🤠 How to Deputize the Sheriff
 
@@ -32,41 +33,41 @@ _Enforce Conventional Commits on pull request titles like a true sheriff, keep y
 2. **Create a workflow file** `.github/workflows/check-pr-title.yml`.
 3. **Copy this template** into your file:
 
-   ```yml
-   name: PR Title Check
+```yml
+name: PR Title Check
 
-   on:
-     pull_request:
-       types: [opened, edited, synchronize]
+on:
+  pull_request:
+    types: [opened, edited, synchronize]
 
-   jobs:
-     sheriff:
-       runs-on: ubuntu-latest
-       steps:
-         - name: Validate PR title
-           uses: teneplaysofficial/sheriff@v3
-           with:
-             types: [feat, fix, docs, ci, test, chore]
-             scopes: |
-               core
-               api
-               ui
-               docs
-             allow_breaking: true
-             enforce_scopes: true
-   ```
+jobs:
+  sheriff:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Validate PR title
+        uses: teneplaysofficial/sheriff@v3
+        with:
+          types: [feat, fix, docs, ci, test, chore]
+          scopes: |
+            core
+            api
+            ui
+            docs
+          allow_breaking: true
+          enforce_scopes: true
+````
 
 4. **Commit & push** - the Sheriff is now on duty.
    Any outlaw PR title will be gunned down.
 
 ## 🔧 Inputs
 
-| Name             | Required | Default                                                                                                  | Description                                                                      |
-| ---------------- | -------- | -------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------- |
-| `types`          | No       | Loaded from [`types.json`](https://github.com/teneplaysofficial/sheriff/blob/main/src/data/types.json)   | List of allowed commit types                                                     |
-| `scopes`         | No       | Loaded from [`scopes.json`](https://github.com/teneplaysofficial/sheriff/blob/main/src/data/scopes.json) | Same as `types` but for commit scopes                                            |
-| `allow_breaking` | No       | `true`                                                                                                   | Whether breaking changes (`!`) are allowed                                       |
-| `enforce_scopes` | No       | `false`                                                                                                  | If `true`, only scopes from config or input are allowed; else any pass any value |
+| Name             | Required | Default                                                                                                  | Description                                                                     |
+| ---------------- | -------- | -------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------- |
+| `types`          | No       | Loaded from [`types.json`](https://github.com/teneplaysofficial/sheriff/blob/main/src/data/types.json)   | List of allowed commit types                                                    |
+| `scopes`         | No       | Loaded from [`scopes.json`](https://github.com/teneplaysofficial/sheriff/blob/main/src/data/scopes.json) | Same as `types` but for commit scopes                                           |
+| `allow_breaking` | No       | `true`                                                                                                   | Whether breaking changes (`!`) are allowed                                      |
+| `enforce_scopes` | No       | `false`                                                                                                  | If `true`, only scopes from config or input are allowed; else any value allowed |
 
 ### Example Input Formats
 
@@ -102,17 +103,17 @@ types: '["feat","fix","docs"]'
 
 Sheriff-approved examples:
 
-- `feat(api): add authentication support`
-- `fix(core|ui): resolve dark mode toggle bug`
-- `docs: update contributing guide`
+* `feat(api): add authentication support`
+* `fix(core|ui): resolve dark mode toggle bug`
+* `docs: update contributing guide`
 
 ## 🚫 Bad PR Titles
 
 Titles that’ll land you in PR jail:
 
-- `feature: add new login page` - type not allowed
-- `fix(auth):` - message empty
-- `performance(core): rename variables` - type not in allowed list
+* `feature: add new login page` - type not allowed
+* `fix(auth):` - message empty
+* `performance(core): rename variables` - type not in allowed list
 
 ## 🔨 How It Works
 
@@ -121,13 +122,16 @@ Titles that’ll land you in PR jail:
 3. Inputs are normalized with `parseList`, supporting commas, pipes, YAML arrays, JSON arrays, or multiline blocks.
 4. The PR title is checked against the Sheriff’s **regex badge**.
 5. PR is marked **invalid** if:
-   - Type is not allowed
-   - Scope is not allowed (only when `enforce_scopes` is `true`)
-   - Breaking change (`!`) is present but disallowed
-   - Message is empty
+
+   * Type is not allowed
+   * Scope is not allowed (only when `enforce_scopes` is `true`)
+   * Breaking change (`!`) is present but disallowed
+   * Message is empty
+   * **NEW:** Title contains `[skip-ci]` but NOT at the end of the line
+     (must be exactly `… [skip-ci]`)
 
 ## 📜 License
 
 Released under the [Apache-2.0](LICENSE) License.
 
-_The Sheriff works free of charge, but tips are appreciated in the form of stars._
+*The Sheriff works free of charge, but tips are appreciated in the form of stars.*
