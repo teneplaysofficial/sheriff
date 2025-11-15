@@ -58,7 +58,7 @@ function validate(title = '') {
 
   if (skipCiMatch) {
     core.info(
-      `Skipping PR title checks because [skip-ci] was found at index ${skipCiMatch[1]}`,
+      `Skipping PR title checks because [skip-ci] was found at index ${skipCiMatch.index}`,
     );
     return { valid: true };
   }
