@@ -2,15 +2,8 @@ name: Tests
 
 on:
   pull_request:
-    types: [opened, edited, synchronize, reopened]
-    paths:
-      - 'src/**'
-      - 'tests/**'
   push:
     branches: [main]
-    paths:
-      - 'src/**'
-      - 'tests/**'
 
 jobs:
   sheriff:
