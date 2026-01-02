@@ -37,7 +37,7 @@ _Enforce Conventional Commits on pull request titles like a true sheriff, keep y
 
    on:
      pull_request:
-       types: [opened, edited, synchronize]
+       types: [opened, edited, reopened]
 
    jobs:
      sheriff:
