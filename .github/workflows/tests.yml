@@ -11,7 +11,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Validate PR title
-        uses: teneplaysofficial/sheriff@v1
+        uses: teneplaysofficial/sheriff@v4
 
   test:
     runs-on: ubuntu-latest
