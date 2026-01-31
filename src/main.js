@@ -294,12 +294,10 @@ export async function main() {
     if (scopesInput.length) config.scopes = scopesInput
 
     // allow_breaking
-    config.allow_breaking =
-      core.getBooleanInput('allow_breaking') ?? config.allow_breaking
+    config.allow_breaking = core.getBooleanInput('allow_breaking')
 
     // enforce_scopes
-    config.enforce_scopes =
-      core.getBooleanInput('enforce_scopes') ?? config.enforce_scopes
+    config.enforce_scopes = core.getBooleanInput('enforce_scopes')
 
     // Log effective configuration
     core.info(`Allowed commit types: ${config.types.join(', ')}`)

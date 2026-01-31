@@ -125,7 +125,7 @@ Rules:
 ### 🌍 Using a Remote Ignore File
 
 ```yml
-- uses: teneplaysofficial/sheriff@v3
+- uses: teneplaysofficial/sheriff@v5
   with:
     ignore-authors: https://raw.githubusercontent.com/org/sheriff-config/main/ignored-authors.txt
 ```
