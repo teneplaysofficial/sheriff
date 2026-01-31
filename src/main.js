@@ -57,15 +57,28 @@ function readLocalFile(filePath) {
 
 // Fetches ignore-authors from a remote URL
 async function fetchRemoteFile(url) {
-  const response = await fetch(url)
+  const controller = new AbortController()
+  const timeout = setTimeout(() => controller.abort(), 10_000)
 
-  if (!response.ok) {
-    throw new Error(
-      `Failed to fetch ignore-authors file (${response.status} ${response.statusText})`,
-    )
+  try {
+    const response = await fetch(url, { signal: controller.signal })
+
+    if (!response.ok) {
+      throw new Error(
+        `Failed to fetch ignore-authors file (${response.status} ${response.statusText})`,
+      )
+    }
+
+    return parseIgnoreAuthors(await response.text())
+  } catch (error) {
+    if (error.name === 'AbortError') {
+      throw new Error('Request timed out while fetching ignore-authors file')
+    }
+
+    throw error
+  } finally {
+    clearTimeout(timeout)
   }
-
-  return parseIgnoreAuthors(await response.text())
 }
 
 // Loads ignore-authors from either a URL or local file
