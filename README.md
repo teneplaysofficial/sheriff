@@ -96,11 +96,7 @@ This is controlled using **one input**: `ignore-authors`.
 
 ### 📄 Default Ignore File
 
-When `ignore-authors: true`, Sheriff loads:
-
-```
-[src/data/ignored-authors.txt](./src/data/ignored-authors.txt)
-```
+When `ignore-authors: true`, Sheriff loads: [src/data/ignored-authors.txt](./src/data/ignored-authors.txt)
 
 > relative to the repository root
 

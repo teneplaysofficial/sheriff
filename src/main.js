@@ -24,7 +24,6 @@ export const config = {
 const TITLE_REGEX =
   /^(BREAKING CHANGE|[a-z]+)(?:\(([a-z0-9-]+(?:,[a-z0-9-]+)*)\))?(!?):\s(.+)$/
 
-const normalize = (value) => value.toLowerCase().trim()
 const isBoolean = (value) => /^(true|false|1|0)$/i.test(value)
 
 // Resolves paths relative to the GitHub workspace when needed
@@ -82,8 +81,17 @@ async function loadIgnoreAuthors(source) {
 
 // Checks whether the PR author matches any ignore rule
 function isAuthorIgnored(rules, name, email) {
-  const author = normalize(`${name} <${email}>`)
-  return rules.some((rule) => normalize(rule) === author)
+  return rules.some((rule) => {
+    if ((name && rule === name) || (email && rule === email)) return true
+
+    const m = rule.match(/^(.+?)\s*<(.+)>$/)
+    if (!m) return false
+
+    const [, rName, rEmail] = m
+    if (name && rName !== name) return false
+
+    return !email || rEmail === email
+  })
 }
 
 async function writeSummary({ title, author, valid, skipped, reason }) {
@@ -235,8 +243,7 @@ export async function main() {
     }
 
     const authorName = pr.user.login
-    const authorEmail =
-      pr.user.email || `${authorName}@users.noreply.github.com`
+    const authorEmail = pr.user.email
 
     config.title = pr.title.trim()
 
@@ -277,6 +284,8 @@ export async function main() {
         valid: true,
         skipped: true,
       })
+
+      core.endGroup()
 
       return
     }
