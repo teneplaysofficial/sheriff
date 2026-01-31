@@ -1,195 +1,305 @@
-const test = require('node:test');
-const assert = require('node:assert/strict');
-const { validate, config, parseList } = require('../src/index');
+import assert from 'node:assert/strict'
+import fs from 'node:fs'
+import test from 'node:test'
+import * as core from '@actions/core'
+import * as github from '@actions/github'
+import { config, main, validate } from '../src/main.js'
+
+function setTitle(title) {
+  config.title = title
+}
+
+function resetConfig() {
+  config.title = ''
+  config.allow_breaking = true
+  config.enforce_scopes = false
+}
 
 test.describe('validate()', () => {
   test('rejects empty title', () => {
-    const r = validate('');
-    assert.equal(r.valid, false);
-    assert.match(r.reason, /Title is empty or not a string/i);
-  });
+    resetConfig()
+    setTitle('')
+    const r = validate()
+    assert.equal(r.valid, false)
+    assert.match(r.reason, /PR title is missing/i)
+  })
 
-  test('rejects non-string input', () => {
-    const r = validate(123);
-    assert.equal(r.valid, false);
-    assert.match(r.reason, /not a string/i);
-  });
+  test('rejects non-string title', () => {
+    resetConfig()
+    config.title = 123
+    const r = validate()
+    assert.equal(r.valid, false)
+    assert.match(r.reason, /not a string/i)
+  })
 
-  test('rejects wrong format', () => {
-    const r = validate('just a random title');
-    assert.equal(r.valid, false);
-    assert.match(r.reason, /format/);
-  });
+  test('rejects completely invalid format', () => {
+    resetConfig()
+    setTitle('just a random title')
+    const r = validate()
+    assert.equal(r.valid, false)
+    assert.match(r.reason, /format/i)
+  })
 
+  test('rejects uppercase type', () => {
+    resetConfig()
+    setTitle('Feat: add feature')
+    const r = validate()
+    assert.equal(r.valid, false)
+    assert.match(r.reason, /must be lowercase/)
+  })
+
+  test('rejects extra spaces around syntax', () => {
+    resetConfig()
+    setTitle('feat (core) : msg')
+    const r = validate()
+    assert.equal(r.valid, false)
+    assert.match(r.reason, /Extra spaces/)
+  })
+
+  test('rejects pipe-separated scopes', () => {
+    resetConfig()
+    setTitle('feat(core|api): msg')
+    const r = validate()
+    assert.equal(r.valid, false)
+    assert.match(r.reason, /comma-separated/)
+  })
+
+  test('rejects scopes with spaces', () => {
+    resetConfig()
+    setTitle('feat(core, api): msg')
+    const r = validate()
+    assert.equal(r.valid, false)
+    assert.match(r.reason, /must not contain spaces/)
+  })
+
+  test('rejects empty scope', () => {
+    resetConfig()
+    setTitle('feat(): msg')
+    const r = validate()
+    assert.equal(r.valid, false)
+    assert.match(r.reason, /Scope cannot be empty/)
+  })
+
+  // MESSAGE
+  test('rejects empty message after colon', () => {
+    resetConfig()
+    setTitle('feat:   ')
+    const r = validate()
+    assert.equal(r.valid, false)
+    assert.match(r.reason, /cannot be empty/)
+  })
+
+  // TYPE
   test('accepts valid type and message', () => {
-    const title = `${config.types[0]}: add feature`;
-    const result = validate(title);
-    assert.equal(result.valid, true);
-  });
+    resetConfig()
+    setTitle(`${config.types[0]}: add feature`)
+    const r = validate()
+    assert.equal(r.valid, true)
+  })
 
   test('rejects invalid type', () => {
-    const title = 'foo: something';
-    const result = validate(title);
-    assert.equal(result.valid, false);
-    assert.match(result.reason, /not allowed/);
-  });
+    resetConfig()
+    setTitle('foo: something')
+    const r = validate()
+    assert.equal(r.valid, false)
+    assert.match(r.reason, /Type "foo" is not allowed/)
+  })
 
-  test('rejects invalid scope when enforce_scopes = true', () => {
-    config.enforce_scopes = true;
-    const title = `${config.types[0]}(badscope): msg`;
-    const result = validate(title);
-    assert.equal(result.valid, false);
-    assert.match(result.reason, /Scope "badscope"/);
-    config.enforce_scopes = false;
-  });
+  // SCOPE
+  test('accepts valid single scope when enforced', () => {
+    resetConfig()
+    config.enforce_scopes = true
+    const s = config.scopes[0]
+    setTitle(`feat(${s}): msg`)
+    const r = validate()
+    assert.equal(r.valid, true)
+  })
 
-  test('accepts invalid scope when enforce_scopes = false', () => {
-    config.enforce_scopes = false;
-    const title = `${config.types[0]}(randomscope): msg`;
-    const result = validate(title);
-    assert.equal(result.valid, true);
-  });
+  test('accepts multiple valid scopes when enforced', () => {
+    resetConfig()
+    config.enforce_scopes = true
+    const s = config.scopes[0]
+    setTitle(`feat(${s},${s}): msg`)
+    const r = validate()
+    assert.equal(r.valid, true)
+  })
 
-  test('accepts multiple scopes separated by | when enforce_scopes = true', () => {
-    config.enforce_scopes = true;
-    const validScope = config.scopes[0];
-    const title = `${config.types[0]}(${validScope}|${validScope}): msg`;
-    const result = validate(title);
-    assert.equal(result.valid, true);
-    config.enforce_scopes = false;
-  });
+  test('rejects single invalid scope when enforced', () => {
+    resetConfig()
+    config.enforce_scopes = true
+    setTitle('feat(badscope): msg')
+    const r = validate()
+    assert.equal(r.valid, false)
+    assert.match(r.reason, /Invalid scope/)
+  })
 
-  test('rejects when one of multiple scopes is invalid', () => {
-    config.enforce_scopes = true;
-    const validScope = config.scopes[0];
-    const title = `${config.types[0]}(${validScope}|badscope): msg`;
-    const result = validate(title);
-    assert.equal(result.valid, false);
-    assert.match(result.reason, /Scope "badscope"/);
-    config.enforce_scopes = false;
-  });
+  test('rejects multiple invalid scopes when enforced', () => {
+    resetConfig()
+    config.enforce_scopes = true
+    setTitle('feat(bad1,bad2): msg')
+    const r = validate()
+    assert.equal(r.valid, false)
+    assert.match(r.reason, /Invalid scopes: bad1, bad2/)
+  })
 
-  test('handles breaking changes when allowed', () => {
-    const title = `${config.types[0]}!: breaking stuff`;
-    const result = validate(title);
-    assert.equal(result.valid, true);
-  });
+  test('accepts invalid scope when enforcement is off', () => {
+    resetConfig()
+    setTitle('feat(randomscope): msg')
+    const r = validate()
+    assert.equal(r.valid, true)
+  })
 
-  test('rejects breaking changes if disabled', () => {
-    config.allow_breaking = false;
-    const title = `${config.types[0]}!: breaking stuff`;
-    const result = validate(title);
-    assert.equal(result.valid, false);
-    assert.match(result.reason, /not allowed/);
-    config.allow_breaking = true;
-  });
+  // BREAKING CHANGE
+  test('allows breaking changes when enabled', () => {
+    resetConfig()
+    setTitle('feat!: breaking stuff')
+    const r = validate()
+    assert.equal(r.valid, true)
+  })
 
-  test('rejects BREAKING CHANGE type with exclamation', () => {
-    const title = 'BREAKING CHANGE!: overhaul';
-    const result = validate(title);
-    assert.equal(result.valid, false);
-    assert.match(result.reason, /must not include "!"/);
-  });
+  test('rejects breaking changes when disabled', () => {
+    resetConfig()
+    config.allow_breaking = false
+    setTitle('feat!: breaking stuff')
+    const r = validate()
+    assert.equal(r.valid, false)
+    assert.match(r.reason, /Breaking changes are not allowed/)
+  })
 
-  test('accepts BREAKING CHANGE type without exclamation', () => {
-    const title = 'BREAKING CHANGE: overhaul';
-    const result = validate(title);
-    assert.equal(result.valid, true);
-  });
+  test('rejects BREAKING CHANGE with exclamation', () => {
+    resetConfig()
+    setTitle('BREAKING CHANGE!: overhaul')
+    const r = validate()
+    assert.equal(r.valid, false)
+    assert.match(r.reason, /must not include "!"/)
+  })
 
-  test('rejects empty message after colon', () => {
-    const title = `${config.types[0]}:   `;
-    const result = validate(title);
-    assert.equal(result.valid, false);
-    assert.match(result.reason, /empty/);
-  });
+  test('accepts BREAKING CHANGE without exclamation', () => {
+    resetConfig()
+    setTitle('BREAKING CHANGE: overhaul')
+    const r = validate()
+    assert.equal(r.valid, true)
+  })
 
-  test('rejects capitalized type', () => {
-    const title = 'Feat: add feature';
-    const result = validate(title);
-    assert.equal(result.valid, false);
-    assert.match(result.reason, /must be lowercase/);
-  });
-
-  test('rejects title with extra spaces trimmed', () => {
-    const validScope = config.scopes[0];
-    const title = ` ${config.types[0]} ( ${validScope} ) : spaced msg `;
-    const result = validate(title);
-    assert.equal(result.valid, false);
-    assert.match(result.reason, /not allowed/);
-  });
-
+  // SKIP-CI
   test('accepts title ending with [skip-ci]', () => {
-    const result = validate('feat: add feature [skip-ci]');
-    assert.equal(result.valid, true);
-  });
+    resetConfig()
+    setTitle('feat: add feature [skip-ci]')
+    const r = validate()
+    assert.equal(r.valid, true)
+  })
 
-  test('accepts title ending with spaced [ skip-ci ]', () => {
-    const result = validate('fix(core): fast fix [ skip-ci ]');
-    assert.equal(result.valid, true);
-  });
+  test('accepts title with spaced [ skip-ci ]', () => {
+    resetConfig()
+    setTitle('fix(core): fast fix [ skip-ci ]')
+    const r = validate()
+    assert.equal(r.valid, true)
+  })
 
-  test('accepts title with uppercase SKIP-CI', () => {
-    const result = validate('docs: update readme [SKIP-CI]');
-    assert.equal(result.valid, true);
-  });
+  test('accepts uppercase [SKIP-CI]', () => {
+    resetConfig()
+    setTitle('docs: update readme [SKIP-CI]')
+    const r = validate()
+    assert.equal(r.valid, true)
+  })
 
-  test('skip-ci must be at the end only', () => {
-    const result = validate('[skip-ci] feat: xyz');
-    assert.equal(result.valid, false);
-  });
+  test('does not skip when [skip-ci] is not at the end', () => {
+    resetConfig()
+    setTitle('[skip-ci] feat: xyz')
+    const r = validate()
+    assert.equal(r.valid, false)
+  })
 
-  test('skip-ci embedded without brackets should not skip', () => {
-    const result = validate('feat: skip-ci update');
-    assert.equal(result.valid, true);
-  });
-});
+  test('does not skip when skip-ci is not bracketed', () => {
+    resetConfig()
+    setTitle('feat: skip-ci update')
+    const r = validate()
+    assert.equal(r.valid, true)
+  })
+})
 
-test.describe('parseList()', () => {
-  const cases = [
-    { input: 'a,b,c', expected: ['a', 'b', 'c'], desc: 'comma-separated' },
-    {
-      input: '"a","b","c"',
-      expected: ['a', 'b', 'c'],
-      desc: 'quoted comma-separated',
-    },
-    { input: 'a\nb\nc', expected: ['a', 'b', 'c'], desc: 'newline-separated' },
-    {
-      input: '[a, b, c]',
-      expected: ['a', 'b', 'c'],
-      desc: 'YAML-style inline array',
-    },
-    {
-      input: '  "x" ,  y ,  z  ',
-      expected: ['x', 'y', 'z'],
-      desc: 'trims whitespace and quotes',
-    },
-    { input: '', expected: [], desc: 'empty string to empty array' },
-    {
-      input: 'a,,b,\n,',
-      expected: ['a', 'b'],
-      desc: 'filters out empty items',
-    },
-    {
-      input: ['a', 'b'],
-      expected: ['a', 'b'],
-      desc: 'already an array to unchanged',
-    },
-    {
-      input: ' single ',
-      expected: ['single'],
-      desc: 'single value with spaces',
-    },
-    {
-      input: 'a|b|c',
-      expected: ['a', 'b', 'c'],
-      desc: 'pipe-separated list',
-    },
-  ];
+function setInput(name, value) {
+  process.env[`INPUT_${name.replace(/ /g, '_').toUpperCase()}`] = value
+}
 
-  for (const { input, expected, desc } of cases) {
-    test(`parses ${desc}`, () => {
-      assert.deepEqual(parseList(input), expected);
-    });
+function clearInputs() {
+  for (const key of Object.keys(process.env)) {
+    if (key.startsWith('INPUT_')) delete process.env[key]
   }
-});
+}
+
+if (core.summary) {
+  core.summary.addHeading = () => core.summary
+  core.summary.addTable = () => core.summary
+  core.summary.addCodeBlock = () => core.summary
+  core.summary.write = async () => {}
+}
+
+test.describe('main()', () => {
+  test.beforeEach(() => {
+    clearInputs()
+  })
+
+  test('skips ignored author', async () => {
+    fs.mkdirSync('.temp', { recursive: true })
+    fs.writeFileSync(
+      '.temp/ignored.txt',
+      'tene <tene@users.noreply.github.com>',
+    )
+
+    setInput('ignore-authors', '.temp/ignored.txt')
+
+    github.context.payload = {
+      pull_request: {
+        title: 'feat: ignored',
+        user: { login: 'tene', email: null },
+      },
+    }
+
+    await main()
+
+    fs.unlinkSync('.temp/ignored.txt')
+  })
+
+  test('handles missing ignore file', async () => {
+    setInput('ignore-authors', 'missing.txt')
+
+    github.context.payload = {
+      pull_request: {
+        title: 'feat: ok',
+        user: { login: 'user', email: null },
+      },
+    }
+
+    await main()
+  })
+
+  test('loads ignore-authors from URL', async () => {
+    global.fetch = async () => ({
+      ok: true,
+      text: async () => 'tene <tene@users.noreply.github.com>',
+    })
+
+    setInput('ignore-authors', 'https://example.com/ignore.txt')
+
+    github.context.payload = {
+      pull_request: {
+        title: 'feat: remote',
+        user: { login: 'tene', email: null },
+      },
+    }
+
+    await main()
+  })
+
+  test('fails when not PR event', async () => {
+    github.context.payload = {}
+
+    await main()
+
+    assert.equal(process.exitCode, 1)
+
+    // IMPORTANT: reset it so the test runner does not fail
+    process.exitCode = 0
+  })
+})

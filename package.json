@@ -24,27 +24,20 @@
     "workflow",
     "automation"
   ],
+  "type": "module",
   "main": "dist/index.js",
   "scripts": {
     "prepare": "husky",
     "release": "release-it",
-    "test": "node tests/index.test.js",
-    "prebuild": "yarn test && yarn sort",
+    "test": "npx -y c8 node --test",
     "build": "esbuild src/index.js --bundle --minify --platform=node --outfile=dist/index.js",
-    "sort": "node scripts/sort-and-clean-json.js",
-    "lint": "eslint --ignore-pattern \"dist/*\"",
-    "lint:fix": "eslint --fix --ignore-pattern \"dist/*\" .",
-    "format": "prettier --write"
+    "fix": "biome check --write",
+    "lint": "biome check"
   },
   "lint-staged": {
-    "*.{js,ts,json,md,yaml,yml}": "yarn format",
-    "*.{ts}": "yarn lint"
-  },
-  "prettier": {
-    "semi": true,
-    "singleQuote": true,
-    "trailingComma": "all",
-    "tabWidth": 2
+    "*.{ts,js,json}": [
+      "biome check --write --no-errors-on-unmatched"
+    ]
   },
   "release-it": {
     "git": {
@@ -59,26 +52,22 @@
       "release": true
     },
     "hooks": {
-      "before:init": "yarn prebuild && yarn build",
+      "before:init": "yarn build",
       "before:commit": "git add .",
       "after:release": "node scripts/tag-major.js"
     }
   },
   "dependencies": {
     "@actions/core": "^2.0.0",
-    "@actions/github": "^7.0.0"
+    "@actions/github": "^7.0.0",
+    "@js-utils-kit/constants": "^0.2.0"
   },
   "devDependencies": {
-    "@eslint/js": "^9.33.0",
-    "@eslint/json": "^0.14.0",
-    "@eslint/markdown": "^7.1.0",
+    "@biomejs/biome": "^2.3.13",
     "@types/node": "^24.3.0",
     "esbuild": "^0.27.0",
-    "eslint": "^9.33.0",
-    "globals": "^17.0.0",
     "husky": "^9.1.7",
     "lint-staged": "^16.1.5",
-    "prettier": "^3.6.2",
     "release-it": "^19.0.4"
   }
 }

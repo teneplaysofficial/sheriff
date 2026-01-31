@@ -1,0 +1,15 @@
+name: PR Title Check
+
+on:
+  pull_request:
+    types: [opened, edited]
+
+jobs:
+  sheriff:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: read
+    steps:
+      - name: Validate PR title
+        uses: teneplaysofficial/sheriff@v4
