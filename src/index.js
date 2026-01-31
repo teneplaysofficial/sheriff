@@ -1,3 +1,3 @@
 import { main } from './main'
 
-await main()
+;(async () => await main())()
