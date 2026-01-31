@@ -1,0 +1,49 @@
+############################################################
+# 🤠 Sheriff - Ignored PR Authors
+# Format:
+#   name <email>
+#
+# Rules:
+# - One entry per line
+# - Case-insensitive
+# - Empty lines allowed
+# - Lines starting with # are comments
+# - Inline comments after rules are allowed
+############################################################
+
+# GitHub Bots
+
+dependabot[bot] <49699333+dependabot[bot]@users.noreply.github.com>
+github-actions[bot] <41898282+github-actions[bot]@users.noreply.github.com>
+
+# Release / Versioning Bots
+
+renovate[bot] <29139614+renovate[bot]@users.noreply.github.com>
+release-please[bot] <55107282+release-please[bot]@users.noreply.github.com>
+semantic-release-bot <32174276+semantic-release-bot@users.noreply.github.com>
+changesets[bot] <73861492+changesets[bot]@users.noreply.github.com>
+
+# CI / Coverage Bots
+
+codecov[bot] <8783680+codecov[bot]@users.noreply.github.com>
+circleci[bot] <13623004+circleci[bot]@users.noreply.github.com>
+travis-ci[bot] <6398238+travis-ci[bot]@users.noreply.github.com>
+
+# Security / Dependency Bots
+
+snyk[bot] <19733683+snyk[bot]@users.noreply.github.com>
+dependabot-preview[bot] <27856297+dependabot-preview[bot]@users.noreply.github.com>
+
+# Package Manager Bots
+
+npm-bot <19665574+npm-bot@users.noreply.github.com>
+pnpm-bot <25200363+pnpm-bot@users.noreply.github.com>
+yarnpkg-bot <34992278+yarnpkg-bot@users.noreply.github.com>
+
+# Lint / Format Bots
+
+eslint[bot] <46171082+eslint[bot]@users.noreply.github.com>
+prettier[bot] <68286829+prettier[bot]@users.noreply.github.com>
+
+mergify[bot] <37929162+mergify[bot]@users.noreply.github.com>
+allcontributors[bot] <46469821+allcontributors[bot]@users.noreply.github.com>

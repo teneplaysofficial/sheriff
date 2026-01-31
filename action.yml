@@ -1,34 +1,46 @@
-name: 'Sheriff Action CI'
-description: 'Enforce Conventional Commits on pull request titles like a true sheriff'
-author: 'Sriman'
+name: "Sheriff Action CI"
+description: "Enforce Conventional Commits on pull request titles like a true sheriff"
+author: "Sriman"
 
 branding:
-  color: 'gray-dark'
-  icon: 'shield'
+  color: "gray-dark"
+  icon: "shield"
 
 runs:
-  using: 'node20'
-  main: 'dist/index.js'
+  using: "node20"
+  main: "dist/index.js"
 
 inputs:
   types:
-    description: 'Comma separated list of allowed types'
+    description: "Comma separated list of allowed types"
     required: false
 
   scopes:
-    description: 'Comma separated list of allowed scopes (empty means no restriction)'
+    description: "Comma separated list of allowed scopes (empty means no restriction)"
     required: false
 
   allow_breaking:
-    description: 'Allow breaking changes (!) in title (true/false)'
+    description: "Allow breaking changes (!) in title (true/false)"
     required: false
-    default: true
+    default: "true"
 
   enforce_scopes:
-    description: 'If true, enforce default or provided scopes. If false, allow any scope'
+    description: "If true, enforce default or provided scopes. If false, allow any scope"
     required: false
-    default: false
+    default: "false"
+
+  ignore-authors:
+    description: |
+      Controls ignored PR authors behavior.
+
+      Accepted values:
+        - true   → use default ignored-authors.txt
+        - false  → disable ignore-authors
+        - <path> → path to ignored-authors.txt
+        - <url>  → HTTPS URL to ignored-authors.txt
+    required: false
+    default: "false"
 
 outputs:
   valid:
-    description: 'true if PR title matches, false otherwise'
+    description: "true if PR title matches, false otherwise"
