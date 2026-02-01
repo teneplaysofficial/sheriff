@@ -58,7 +58,7 @@
     }
   },
   "dependencies": {
-    "@actions/core": "^2.0.0",
+    "@actions/core": "^3.0.0",
     "@actions/github": "^9.0.0",
     "@js-utils-kit/constants": "^0.2.0"
   },
