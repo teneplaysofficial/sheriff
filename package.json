@@ -30,7 +30,7 @@
     "prepare": "husky",
     "release": "release-it",
     "test": "npx -y c8 node --test",
-    "build": "esbuild src/index.js --bundle --minify --platform=node --outfile=dist/index.js",
+    "build": "esbuild src/index.js --bundle --minify --platform=node --format=esm --outfile=dist/index.js",
     "fix": "biome check --write",
     "lint": "biome check"
   },
