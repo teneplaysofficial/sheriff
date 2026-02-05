@@ -12,4 +12,4 @@ jobs:
       pull-requests: read
     steps:
       - name: Validate PR title
-        uses: teneplaysofficial/sheriff@v4
+        uses: teneplaysofficial/sheriff@v5
