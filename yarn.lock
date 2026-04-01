@@ -375,17 +375,17 @@
   resolved "https://registry.yarnpkg.com/@inquirer/type/-/type-3.0.8.tgz#efc293ba0ed91e90e6267f1aacc1c70d20b8b4e8"
   integrity sha512-lg9Whz8onIHRthWaN1Q9EGLa/0LFJjyM8mEUbL1eTi6yMGvBf8gvyDLtxSXztQsxMvhxxNpJYrwa1YHdq+w4Jw==
 
-"@js-utils-kit/constants@^0.4.0":
-  version "0.4.0"
-  resolved "https://registry.yarnpkg.com/@js-utils-kit/constants/-/constants-0.4.0.tgz#395b4782ef8bc543e23192cd877317ba513bece5"
-  integrity sha512-p2yXcuSdYwSHIOD9Uju65vGLaShQiWoyybJgMbcihltG6RIIvg8/Yo9k9uGmkr6Onehl4hoQL6fji3mcH2cFqg==
+"@js-utils-kit/constants@^0.5.0":
+  version "0.5.0"
+  resolved "https://registry.yarnpkg.com/@js-utils-kit/constants/-/constants-0.5.0.tgz#15670db2b3041960ea27244e17adacf8ae876529"
+  integrity sha512-odGzOUhrS3jMx98RCJpQ0JIuFmx/iiOdMd4fQNJs5SpGntJ+VtuoqDs3NhclZVuHvKudF/lxbe4Cx6FdQfvfhA==
   dependencies:
-    "@js-utils-kit/types" "1.5.0"
+    "@js-utils-kit/types" "1.6.0"
 
-"@js-utils-kit/types@1.5.0":
-  version "1.5.0"
-  resolved "https://registry.yarnpkg.com/@js-utils-kit/types/-/types-1.5.0.tgz#5f7be427b30d42ed398f802223e1bb2e7227b1a3"
-  integrity sha512-nhv6b7Uj2SbEv8mn4CiZvkMbIRCMDgzMREN2W1eqTpQOJjqg3WvCbIXDV58F9teN4EAPUxZQbxfiarBpqXA0yQ==
+"@js-utils-kit/types@1.6.0":
+  version "1.6.0"
+  resolved "https://registry.yarnpkg.com/@js-utils-kit/types/-/types-1.6.0.tgz#4f4bedd960cbe4c732f0116bee855244c2671dfa"
+  integrity sha512-UnwNxsB4teQGaJxdskxaOp6cearZiXX/UsE0IEJcAfiIrNOlUl/vK0FJVVuaSpRLbVRcQgtrX0JhBZRQT5NR4g==
 
 "@nodeutils/defaults-deep@1.1.0":
   version "1.1.0"
